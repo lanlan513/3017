@@ -1,0 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&family=Special+Elite&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: "Crimson Text", Georgia, serif;
+  line-height: 1.6;
+  font-weight: 400;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: #2C1810;
+}
+
+@layer utilities {
+  .text-shadow-ink {
+    text-shadow: 2px 2px 4px rgba(20, 9, 6, 0.5);
+  }
+
+  .border-parchment {
+    border-image: linear-gradient(135deg, #D4B896, #A68B5B, #D4B896) 1;
+  }
+
+  .paper-edge {
+    position: relative;
+  }
+
+  .paper-edge::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 1px solid rgba(107, 84, 51, 0.3);
+    pointer-events: none;
+  }
+
+  .ink-divider {
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #8B2500, transparent);
+  }
+}
