@@ -1,9 +1,30 @@
+export interface ClueRelation {
+  targetClueId: string;
+  description: string;
+  type: 'leads_to' | 'contradicts' | 'supports' | 'related';
+}
+
+export interface TimelineNode {
+  time: string;
+  event: string;
+}
+
 export interface Clue {
   id: string;
   title: string;
   summary: string;
   detail: string;
   icon: string;
+  timeline?: TimelineNode;
+  relations: ClueRelation[];
+}
+
+export interface DeductionResult {
+  isCorrect: boolean;
+  correctSuspectId: string;
+  correctSuspectName: string;
+  explanation: string;
+  keyEvidence: string[];
 }
 
 export interface Suspect {
@@ -22,6 +43,11 @@ export interface Case {
   description: string;
   clues: Clue[];
   suspects: Suspect[];
+  culpritId: string;
+  solution: {
+    explanation: string;
+    keyEvidence: string[];
+  };
 }
 
 export interface DeductionLog {

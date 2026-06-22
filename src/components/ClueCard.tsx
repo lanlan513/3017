@@ -1,11 +1,13 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Search } from 'lucide-react';
+import { ChevronDown, Search, GitBranch } from 'lucide-react';
 import { useDeductionStore } from '../stores/useDeductionStore';
+import { DeductionTree } from './DeductionTree';
 import type { Clue } from '../types';
 
 interface ClueCardProps {
   clue: Clue;
   index: number;
+  allClues: Clue[];
 }
 
 const iconMap: Record<string, string> = {
@@ -23,12 +25,28 @@ const iconMap: Record<string, string> = {
   briefcase: '🧳',
 };
 
-export const ClueCard = ({ clue, index }: ClueCardProps) => {
-  const { expandedClues, toggleClue } = useDeductionStore();
+export const ClueCard = ({ clue, index, allClues }: ClueCardProps) => {
+  const { expandedClues, toggleClue, activeTreeClueId, setActiveTreeClue } = useDeductionStore();
   const isExpanded = expandedClues.includes(clue.id);
+  const isTreeActive = activeTreeClueId === clue.id;
 
   const handleToggle = () => {
     toggleClue(clue.id, clue.title);
+    if (!isExpanded) {
+      setActiveTreeClue(clue.id);
+    } else {
+      setActiveTreeClue(null);
+    }
+  };
+
+  const handleClueClick = (clueId: string) => {
+    const targetClue = allClues.find(c => c.id === clueId);
+    if (targetClue) {
+      if (!expandedClues.includes(clueId)) {
+        toggleClue(clueId, targetClue.title);
+      }
+      setActiveTreeClue(clueId);
+    }
   };
 
   return (
@@ -40,7 +58,9 @@ export const ClueCard = ({ clue, index }: ClueCardProps) => {
     >
       <div 
         onClick={handleToggle}
-        className="relative bg-parchment-100 border border-parchment-300 rounded-sm cursor-pointer overflow-hidden group"
+        className={`relative bg-parchment-100 border border-parchment-300 rounded-sm cursor-pointer overflow-hidden group transition-all duration-300 ${
+          isTreeActive ? 'ring-2 ring-blood-500' : ''
+        }`}
       >
         <div className="absolute inset-0 bg-parchment-texture pointer-events-none opacity-40" />
         
@@ -64,6 +84,12 @@ export const ClueCard = ({ clue, index }: ClueCardProps) => {
                 {isExpanded && (
                   <span className="text-xs bg-moss-500 text-parchment-50 px-2 py-0.5 rounded-sm">
                     已查看
+                  </span>
+                )}
+                {clue.relations && clue.relations.length > 0 && (
+                  <span className="text-xs bg-blood-500/20 text-blood-600 px-2 py-0.5 rounded-sm flex items-center gap-1">
+                    <GitBranch className="w-3 h-3" />
+                    关联 {clue.relations.length}
                   </span>
                 )}
               </div>
@@ -101,7 +127,7 @@ export const ClueCard = ({ clue, index }: ClueCardProps) => {
               <div className="px-5 pb-5">
                 <div className="h-px bg-gradient-to-r from-transparent via-parchment-400 to-transparent mb-4" />
                 
-                <div className="bg-parchment-50/80 border-l-4 border-blood-500 p-4 rounded-r-sm">
+                <div className="bg-parchment-50/80 border-l-4 border-blood-500 p-4 rounded-r-sm mb-4">
                   <div className="flex items-center gap-2 mb-2">
                     <Search className="w-4 h-4 text-blood-500" />
                     <span className="text-xs font-typewriter text-ink-600 uppercase">
@@ -112,6 +138,15 @@ export const ClueCard = ({ clue, index }: ClueCardProps) => {
                     {clue.detail}
                   </p>
                 </div>
+
+                {isTreeActive && (
+                  <DeductionTree
+                    currentClue={clue}
+                    allClues={allClues}
+                    onClueClick={handleClueClick}
+                    activeClueId={activeTreeClueId || ''}
+                  />
+                )}
               </div>
             </motion.div>
           )}

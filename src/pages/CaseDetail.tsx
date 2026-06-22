@@ -6,6 +6,7 @@ import { CaseHeader } from '../components/CaseHeader';
 import { ClueCard } from '../components/ClueCard';
 import { SuspectCard } from '../components/SuspectCard';
 import { DeductionLogPanel } from '../components/DeductionLogPanel';
+import { ResultModal } from '../components/ResultModal';
 import { getCaseById } from '../data/cases';
 import { useDeductionStore } from '../stores/useDeductionStore';
 
@@ -45,14 +46,19 @@ const CaseDetail = () => {
                     线索调查
                   </h2>
                   <p className="text-parchment-400/60 text-sm">
-                    点击线索卡片查看详细信息
+                    点击线索卡片查看详细信息与推理链
                   </p>
                 </div>
               </div>
 
               <div className="space-y-4">
                 {caseData.clues.map((clue, index) => (
-                  <ClueCard key={clue.id} clue={clue} index={index} />
+                  <ClueCard 
+                    key={clue.id} 
+                    clue={clue} 
+                    index={index} 
+                    allClues={caseData.clues}
+                  />
                 ))}
               </div>
             </motion.section>
@@ -119,6 +125,8 @@ const CaseDetail = () => {
           </div>
         </div>
       </div>
+
+      <ResultModal />
 
       <div className="h-16" />
     </div>

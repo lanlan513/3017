@@ -1,9 +1,9 @@
 import { motion } from 'framer-motion';
-import { Clock, Search, User, FileText } from 'lucide-react';
+import { Clock, Search, User, FileText, CheckCircle, AlertCircle } from 'lucide-react';
 import { useDeductionStore } from '../stores/useDeductionStore';
 
 export const DeductionLogPanel = () => {
-  const { logs, expandedClues, selectedSuspectId } = useDeductionStore();
+  const { logs, expandedClues, selectedSuspectId, submitDeduction } = useDeductionStore();
 
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString('zh-CN', { 
@@ -32,6 +32,14 @@ export const DeductionLogPanel = () => {
         return 'text-blood-500 bg-blood-500/10';
       default:
         return 'text-ink-500 bg-ink-500/10';
+    }
+  };
+
+  const canSubmit = selectedSuspectId !== null;
+
+  const handleSubmit = () => {
+    if (canSubmit) {
+      submitDeduction();
     }
   };
 
@@ -75,7 +83,7 @@ export const DeductionLogPanel = () => {
 
         <div className="h-px bg-gradient-to-r from-transparent via-ink-600 to-transparent mb-4" />
 
-        <div className="space-y-3 max-h-64 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-ink-600 scrollbar-track-transparent">
+        <div className="space-y-3 max-h-48 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-ink-600 scrollbar-track-transparent mb-4">
           {logs.length === 0 ? (
             <p className="text-center text-parchment-400/50 text-sm py-4 italic">
               开始你的调查吧...
@@ -110,6 +118,41 @@ export const DeductionLogPanel = () => {
               </motion.div>
             ))
           )}
+        </div>
+
+        <div className="h-px bg-gradient-to-r from-transparent via-ink-600 to-transparent mb-4" />
+
+        <div>
+          {!canSubmit ? (
+            <div className="flex items-start gap-2 p-3 bg-parchment-100/5 border border-parchment-100/10 rounded-sm">
+              <AlertCircle className="w-4 h-4 text-parchment-400 flex-shrink-0 mt-0.5" />
+              <p className="text-xs text-parchment-400/70">
+                请先选择一位嫌疑人，才能提交你的推理结论
+              </p>
+            </div>
+          ) : (
+            <div className="flex items-start gap-2 p-3 bg-moss-500/10 border border-moss-500/30 rounded-sm mb-3">
+              <CheckCircle className="w-4 h-4 text-moss-400 flex-shrink-0 mt-0.5" />
+              <p className="text-xs text-moss-300/80">
+                已锁定嫌疑人，准备好提交你的推理结论了吗？
+              </p>
+            </div>
+          )}
+          
+          <motion.button
+            whileHover={canSubmit ? { scale: 1.02 } : {}}
+            whileTap={canSubmit ? { scale: 0.98 } : {}}
+            onClick={handleSubmit}
+            disabled={!canSubmit}
+            className={`w-full py-3 font-display font-bold rounded-sm transition-all duration-300 flex items-center justify-center gap-2 ${
+              canSubmit
+                ? 'bg-blood-500 hover:bg-blood-600 text-white shadow-leather cursor-pointer'
+                : 'bg-ink-700 text-parchment-500/50 cursor-not-allowed'
+            }`}
+          >
+            <CheckCircle className="w-5 h-5" />
+            <span>完成推理</span>
+          </motion.button>
         </div>
       </div>
     </div>

@@ -1,15 +1,22 @@
 import { create } from 'zustand';
-import type { DeductionLog } from '../types';
+import type { DeductionLog, DeductionResult } from '../types';
+import { getCaseById } from '../data/cases';
 
 interface DeductionState {
   caseId: string | null;
   expandedClues: string[];
   selectedSuspectId: string | null;
   logs: DeductionLog[];
+  deductionResult: DeductionResult | null;
+  showResultModal: boolean;
+  activeTreeClueId: string | null;
   
   setCase: (caseId: string) => void;
   toggleClue: (clueId: string, clueTitle: string) => void;
   selectSuspect: (suspectId: string, suspectName: string) => void;
+  setActiveTreeClue: (clueId: string | null) => void;
+  submitDeduction: () => void;
+  closeResultModal: () => void;
   resetDeduction: () => void;
 }
 
@@ -18,6 +25,9 @@ export const useDeductionStore = create<DeductionState>((set, get) => ({
   expandedClues: [],
   selectedSuspectId: null,
   logs: [],
+  deductionResult: null,
+  showResultModal: false,
+  activeTreeClueId: null,
 
   setCase: (caseId) => {
     if (get().caseId !== caseId) {
@@ -31,8 +41,51 @@ export const useDeductionStore = create<DeductionState>((set, get) => ({
           type: 'note',
           content: '开始调查新案件...',
         }],
+        deductionResult: null,
+        showResultModal: false,
+        activeTreeClueId: null,
       });
     }
+  },
+
+  setActiveTreeClue: (clueId) => {
+    set({ activeTreeClueId: clueId });
+  },
+
+  submitDeduction: () => {
+    const { caseId, selectedSuspectId, logs } = get();
+    if (!caseId || !selectedSuspectId) return;
+
+    const caseData = getCaseById(caseId);
+    if (!caseData) return;
+
+    const isCorrect = selectedSuspectId === caseData.culpritId;
+    const correctSuspect = caseData.suspects.find(s => s.id === caseData.culpritId);
+    
+    const result: DeductionResult = {
+      isCorrect,
+      correctSuspectId: caseData.culpritId,
+      correctSuspectName: correctSuspect?.name || '',
+      explanation: caseData.solution.explanation,
+      keyEvidence: caseData.solution.keyEvidence,
+    };
+
+    const newLog: DeductionLog = {
+      id: `log-${Date.now()}`,
+      timestamp: new Date(),
+      type: 'note',
+      content: isCorrect ? '🎉 推理正确！案件已侦破' : '❌ 推理错误，真凶另有其人',
+    };
+
+    set({
+      deductionResult: result,
+      showResultModal: true,
+      logs: [...logs, newLog],
+    });
+  },
+
+  closeResultModal: () => {
+    set({ showResultModal: false });
   },
 
   toggleClue: (clueId, clueTitle) => {
@@ -98,6 +151,9 @@ export const useDeductionStore = create<DeductionState>((set, get) => ({
         type: 'note',
         content: '重新开始调查...',
       }],
+      deductionResult: null,
+      showResultModal: false,
+      activeTreeClueId: null,
     });
   },
 }));
