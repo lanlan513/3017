@@ -62,7 +62,17 @@ export const useDeductionStore = create<DeductionState>((set, get) => ({
     const { selectedSuspectId, logs } = get();
     
     if (selectedSuspectId === suspectId) {
-      set({ selectedSuspectId: null });
+      const newLog: DeductionLog = {
+        id: `log-${Date.now()}`,
+        timestamp: new Date(),
+        type: 'note',
+        content: `取消对嫌疑人「${suspectName}」的锁定`,
+        suspectId,
+      };
+      set({
+        selectedSuspectId: null,
+        logs: [...logs, newLog],
+      });
     } else {
       const newLog: DeductionLog = {
         id: `log-${Date.now()}`,
